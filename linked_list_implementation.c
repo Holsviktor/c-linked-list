@@ -58,10 +58,12 @@ int main()
 	}
 	linkedListListContents(numberList);
 	printf("Element at index 2: %d\n", *(int*) linkedListGetNode(numberList,2)->data);
-	printf("Popping element at index 3. Value: %d\n", *(int*) linkedListPop(numberList,3));
+	void* elementdata = linkedListPop(numberList,3);
+	printf("Popping element at index 3. Value: %d\n", *(int*) elementdata);
 	puts("Content of list after deleting element at index 3: ");
 	linkedListListContents(numberList);
 	linkedListDestroy(numberList);
+	free(elementdata);
 	//linkedListListContents(numberList); // This line of code should segfault.
 
 
