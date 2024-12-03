@@ -8,12 +8,15 @@ struct ListNode
 	struct ListNode* previous;
 	struct ListNode* next;
 };
+
 struct ListNode* createListNode(void* data, struct ListNode* prev, struct ListNode* next);
 int linkedListAppend(struct ListNode* head, void* data);
+struct ListNode* linkedListGetNode(struct ListNode* head, int index);
 void* linkedListGet(struct ListNode* head, int index);
 void linkedListListContents(struct ListNode* head);
 void linkedListDeleteNode(struct ListNode* node);
 int linkedListDestroy(struct ListNode* head);
+void* linkedListPop(struct ListNode* head,int index);
 
 int main()
 {
@@ -42,7 +45,7 @@ int main()
 	puts("Contents of list before deleting second element:\n");
 	linkedListListContents(numberList);
 	linkedListDeleteNode(numberList->next);
-	puts("Contents of list after deleting second element:\n");
+	puts("Contents of list after deleting second element:");
 	linkedListListContents(numberList);
 	
 	puts("Contents of new list after adding five elements");
@@ -53,6 +56,10 @@ int main()
 		*numbers[i] = 3*i+3;
 		linkedListAppend(numberList, (void *) numbers[i]);
 	}
+	linkedListListContents(numberList);
+	printf("Element at index 2: %d\n", *(int*) linkedListGetNode(numberList,2)->data);
+	printf("Popping element at index 3. Value: %d\n", *(int*) linkedListPop(numberList,3));
+	puts("Content of list after deleting element at index 3: ");
 	linkedListListContents(numberList);
 	linkedListDestroy(numberList);
 	//linkedListListContents(numberList); // This line of code should segfault.
@@ -91,6 +98,23 @@ int linkedListAppend(struct ListNode* head, void* data)
 	return 0;
 }
 
+struct ListNode* linkedListGetNode(struct ListNode* head, int index)
+{
+	if (head->previous != NULL)
+	{
+		return NULL; // Not head of list.
+	}
+	struct ListNode* current_node = head;
+	for (int i = 0; i < index; i++)
+	{
+		if (current_node->next == NULL)
+		{
+			return NULL; // Index too large
+		}
+		current_node = current_node->next;
+	}
+	return current_node;
+}
 void* linkedListGet(struct ListNode* head, int index)
 {
 	if (head->previous != NULL)
@@ -134,7 +158,7 @@ void linkedListDeleteNode(struct ListNode* node)
 		prevNode->next = nextNode;
 	}
 
-	free(node->data); // This will break stuff if the nodes data is passed by reference
+	free(node->data); // This will break stuff if the node's data is passed by reference
 	free(node);
 
 	return;
@@ -156,4 +180,23 @@ int linkedListDestroy(struct ListNode* head)
 	}
 	linkedListDeleteNode(current_node);
 	return 0;
+}
+void* linkedListPop(struct ListNode* head,int index)
+{
+	struct ListNode* target_node = linkedListGetNode(head,index);
+	struct ListNode* nextNode = target_node->next;
+	struct ListNode* prevNode = target_node->previous;
+
+	if (nextNode != NULL)
+	{
+		nextNode->previous = prevNode;
+	}
+	if (prevNode != NULL)
+	{
+		prevNode->next = nextNode;
+	}
+	
+	void* data = target_node->data;
+	free(target_node);
+	return data;
 }
