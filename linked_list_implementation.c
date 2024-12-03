@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+
 struct ListNode
 {
 	void* data;
@@ -10,7 +12,8 @@ struct ListNode* createListNode(void* data, struct ListNode* prev, struct ListNo
 int linkedListAppend(struct ListNode* head, void* data);
 void* linkedListGet(struct ListNode* head, int index);
 void linkedListListContents(struct ListNode* head);
-int linkedListDeleteNode(struct ListNode* node);
+void linkedListDeleteNode(struct ListNode* node);
+int linkedListDestroy(struct ListNode* head);
 
 int main()
 {
@@ -35,10 +38,25 @@ int main()
 		puts("Second append failed, this is also bad.\n");
 	}
 	
-	printf("%d\n", *(int*) linkedListGet(numberList,1));
+	printf("Element at index 1: %d\n", *(int*) linkedListGet(numberList,1));
+	puts("Contents of list before deleting second element:\n");
 	linkedListListContents(numberList);
 	linkedListDeleteNode(numberList->next);
+	puts("Contents of list after deleting second element:\n");
 	linkedListListContents(numberList);
+	
+	puts("Contents of new list after adding five elements");
+	int* numbers[5]; 
+	for (int i = 0; i < 5; i++)
+	{
+		numbers[i] = (int*) malloc(sizeof(int));
+		*numbers[i] = 3*i+3;
+		linkedListAppend(numberList, (void *) numbers[i]);
+	}
+	linkedListListContents(numberList);
+	linkedListDestroy(numberList);
+	//linkedListListContents(numberList); // This line of code should segfault.
+
 
 	return 0;
 }
@@ -102,7 +120,7 @@ void linkedListListContents(struct ListNode* head)
 		index++;
 	}
 }
-int linkedListDeleteNode(struct ListNode* node)
+void linkedListDeleteNode(struct ListNode* node)
 {
 	struct ListNode* nextNode = node->next;
 	struct ListNode* prevNode = node->previous;
@@ -118,4 +136,24 @@ int linkedListDeleteNode(struct ListNode* node)
 
 	free(node->data); // This will break stuff if the nodes data is passed by reference
 	free(node);
+
+	return;
+}
+int linkedListDestroy(struct ListNode* head)
+{
+	if (head->previous != NULL)
+	{
+		return -1;
+	}
+
+	struct ListNode* current_node = head;
+	struct ListNode* next_node = head->next;
+
+	while (current_node->next != NULL)
+	{
+		current_node = current_node->next;
+		linkedListDeleteNode(current_node->previous);
+	}
+	linkedListDeleteNode(current_node);
+	return 0;
 }
